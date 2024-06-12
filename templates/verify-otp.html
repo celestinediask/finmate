@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Enter OTP</title>
+</head>
+
+<body>
+    <h1>Enter OTP</h1>
+    <form action="/verify-otp" method="post">
+
+        {{ if .ErrorMessage }}
+        <p id="tempMessage" style="color: red;">{{ .ErrorMessage }}</p>
+        {{ end }}
+
+        {{ if .SuccessMessage }}
+        <p id="tempMessage" style="color: rgb(0, 172, 0);">{{ .SuccessMessage }}</p>
+        {{ end }}
+
+        <input type="hidden" id="email" name="email" value="{{ .Email }}">
+        <label for="otp">OTP:</label>
+        <input type="text" id="otp" name="otp" required>
+        <button type="submit">Verify</button>
+    </form>
+
+    <script>
+        Reload()
+
+        const tempMessage = document.getElementById("tempMessage")
+        function Reload() {
+            setTimeout(() => {
+                tempMessage.innerHTML = ""
+            }, 8000);
+        }
+    </script>
+</body>
+
+</html>

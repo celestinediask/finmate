@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="POST" action="/logout">
+        <button type="submit">Logout</button>
+    </form>
+
+    <button id="addRecordButton">Add Record</button>
+
+    <h1>Welcome, {{ .Username }}!</h1>
+    <h1>Email: {{ .Email }}!</h1>
+
+    <!-- Records Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody id="records">
+            <!-- Records will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        // if user click on add-record button call add
+        document.getElementById("addRecordButton").addEventListener("click", function () {
+            // Redirect to the Add Record page
+            window.location.href = "/add-record";
+        });
+
+        // Fetch records from the server
+        fetch("/list-records")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(records => {
+                // Display records in the table
+                const recordsTable = document.getElementById("records");
+                if (records.length === 0) {
+                    recordsTable.innerHTML = "<tr><td colspan='5'>No records found</td></tr>";
+                } else {
+                    records.forEach(record => {
+                        const recordRow = document.createElement("tr");
+                        recordRow.innerHTML = `
+                            <td>${record.id}</td>
+                            <td>${record.amount}</td>
+                            <td>${record.description}</td>
+                            <td>${record.category}</td>
+                            <td>${record.payment_method}</td>
+                        `;
+                        recordsTable.appendChild(recordRow);
+                    });
+                }
+            })
+            .catch(error => {
+                // Display error message
+                const recordsTable = document.getElementById("records");
+                recordsTable.innerHTML = `<tr><td colspan='5' style='color:red'>Error fetching records: ${error.message}</td></tr>`;
+            });
+    </script>
+</body>
+
+</html>

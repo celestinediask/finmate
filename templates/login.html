@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+</head>
+
+<body>
+
+    <a href="/signup"><button>SignUp</button></a>
+    <a href="/home"><button>Home</button></a>
+
+    {{ if .SuccessMessage }}
+    <p id="tempMessage" style="color: rgb(0, 149, 25);">{{ .SuccessMessage }}</p>
+    {{ end }}
+
+    {{ if .flash }}
+    <div class="alert alert-success">
+        {{ .flash }}
+    </div>
+    {{ end }}
+
+
+    <h1>Login Form</h1>
+
+
+
+    <form method="POST" action="/login">
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email"><br><br>
+
+        <label for="password">Password:</label><br>
+        <input type="text" id="password" name="password"><br><br>
+
+        {{ if .ErrorMessage}}
+        <p id="tempMessage" style="color: red;">{{ .ErrorMessage }}</p>
+        {{ end }}
+
+        <button type="submit">Login</button>
+
+        <a href="/forgot-password">Forgot Password?</a>
+
+
+
+    </form>
+
+    <script>
+        Reload()
+
+        const tempMessage = document.getElementById("tempMessage")
+        function Reload() {
+            setTimeout(() => {
+                tempMessage.innerHTML = ""
+            }, 5000);
+        }
+    </script>
+
+</body>
+
+</html>

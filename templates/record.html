@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Record</title>
+</head>
+
+<body>
+    <a href="/home"><button>Home</button></a>
+
+    <h1>Add Record</h1>
+
+
+    <form id="recordForm">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" step="0.01" required><br><br>
+
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" required><br><br>
+
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" required><br><br>
+
+        <label for="paymentMethod">Payment Method:</label>
+        <input type="text" id="paymentMethod" name="paymentMethod" required><br><br>
+
+        <button type="submit">Add Record</button>
+        <div id="message"></div>
+    </form>
+
+    <script>
+        document.getElementById("recordForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Get form data
+            const formData = {
+                amount: parseFloat(document.getElementById("amount").value),
+                description: document.getElementById("description").value,
+                category: document.getElementById("category").value,
+                payment_method: document.getElementById("paymentMethod").value
+            };
+
+            // Send POST request to server
+            fetch("/add-record", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Record added:", data);
+                    document.getElementById("message").innerHTML = "<div style='color:green'>Record added successfully</div>";
+                })
+                .catch(error => {
+                    console.error("Error adding record:", error);
+                    document.getElementById("message").innerHTML = "<div style='color:red'>Error adding record: " + error.message + "</div>";
+                });
+        });
+    </script>
+</body>
+
+</html>
