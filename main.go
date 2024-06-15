@@ -4,15 +4,19 @@ import (
 	"finmate/config"
 	"finmate/controllers"
 	"finmate/database"
-	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 func init() {
 	config.LoadEnv()
+	//database.CreateDatabase()
 	database.ConnectDB()
-	database.SyncDB()
+	database.MigrateTable()
 }
 
 // sort time
@@ -22,32 +26,41 @@ func init() {
 
 func main() {
 
-	fmt.Println("hello how")
+	r := chi.NewRouter()
 
-	r := gin.Default()
+	r.Use(middleware.Logger)
 
-	// public routes
-	r.POST("/signup", controllers.Signup)
-	r.POST("/send-email-otp", controllers.SendOTPEmail)
-	r.POST("/verify-email", controllers.VerifyEmail)
-	r.POST("/login", controllers.Login)
-	//r.POST("/logout", controllers.Logout)
+	// auth routes
+	r.Post("/signup", controllers.Signup)
+	r.Post("/send-email-otp", controllers.SendOTPEmail)
+	r.Post("/verify-email", controllers.VerifyEmail)
+	r.Post("/login", controllers.Login)
+	//r.Post("/logout", controllers.Logout)
 
-	// home
+	// user routes
+	userRoutes := chi.NewRouter()
+	r.Mount("/user", userRoutes)
+	userRoutes.Use(controllers.UserAuthMiddleware)
+	userRoutes.Get("/validate", controllers.Validate)
+
+	fmt.Println("Server started on :8080")
+	http.ListenAndServe(":8080", r)
+
+}
+
+/*
 	userRoutes := r.Group("/", controllers.UserAuthMiddleware())
 	{
-		userRoutes.GET("/validate", controllers.Validate)
-		userRoutes.GET("/profile", controllers.Profile)
-		userRoutes.POST("/add-record", controllers.AddRecord)
-		userRoutes.GET("/list-records", controllers.ListRecords)
-		userRoutes.PUT("/edit-record/:id", controllers.EditRecord)
-		userRoutes.DELETE("/delete-record/:id", controllers.DeleteRecord)
+		//userRoutes.Get("/validate", controllers.Validate)
+		// userRoutes.Get("/profile", controllers.Profile)
+		// userRoutes.Post("/add-record", controllers.AddRecord)
+		// userRoutes.Get("/list-records", controllers.ListRecords)
+		// userRoutes.Put("/edit-record/:id", controllers.EditRecord)
+		// userRoutes.Delete("/delete-record/:id", controllers.DeleteRecord)
 
-		userRoutes.GET("/get-record/:id", controllers.GetRecordByID)
-		userRoutes.PATCH("/patch-record/:id", controllers.PatchRecord)
-		userRoutes.GET("/search-records", controllers.SearchRecords)
+		// userRoutes.Get("/get-record/:id", controllers.GetRecordByID)
+		// userRoutes.Patch("/patch-record/:id", controllers.PatchRecord)
+		// userRoutes.Get("/search-records", controllers.SearchRecords)
 		//userRoutes.GET("/count-records", controllers.CountRecords)
 	}
-
-	r.Run(":8080")
-}
+*/

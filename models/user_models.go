@@ -9,8 +9,14 @@ type User struct {
 	Username      string `json:"username" binding:"required"`
 	Email         string `json:"email" binding:"required"`
 	Password      string `json:"password" binding:"required"`
-	EmailVerified bool
+	EmailVerified bool   `json:"is_email_verified"`
 	IsAdmin       bool
+}
+
+type UserResponse struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 type SendOTPEmailReq struct {

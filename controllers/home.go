@@ -1,5 +1,6 @@
 package controllers
 
+/*
 import (
 	"finmate/database"
 	"finmate/models"
@@ -112,3 +113,4 @@ func SearchRecords(c *gin.Context) {
 // 	}
 // 	c.JSON(http.StatusOK, gin.H{"count": count})
 // }
+*/
