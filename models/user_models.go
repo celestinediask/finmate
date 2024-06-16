@@ -39,9 +39,10 @@ type OTPDetails struct {
 }
 
 type Record struct {
-	ID            int     `json:"id"`
-	Amount        float64 `json:"amount"`
-	Description   string  `json:"description"`
-	Category      string  `json:"category"`
-	PaymentMethod string  `json:"payment_method"`
+	ID            int       `json:"id"`
+	Amount        float64   `json:"amount"`
+	Description   string    `json:"description"`
+	Category      string    `json:"category"`
+	PaymentMethod string    `json:"payment_method"`
+	CreatedAt     time.Time `json:"created_at"`
 }

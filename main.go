@@ -51,6 +51,8 @@ func main() {
 	userRoutes.Get("/search-records", controllers.SearchRecords)
 	userRoutes.Get("/count-records", controllers.CountRecords)
 
+	userRoutes.Get("/sort-records", controllers.SortRecords)
+
 	fmt.Println("Server started on :8080")
 	http.ListenAndServe(":8080", r)
 

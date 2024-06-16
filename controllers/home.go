@@ -227,14 +227,52 @@ func CountRecords(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]int64{"count": count})
 }
 
-/*
+func SortRecords(w http.ResponseWriter, r *http.Request) {
+	sortBy := r.URL.Query().Get("sort_by")
+	order := r.URL.Query().Get("order")
+	db := database.DB
 
-// func CountRecords(c *gin.Context) {
-// 	var count int64
-// 	if err := database.DB.Model(&models.Record).Count(&count).Error; err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, gin.H{"count": count})
-// }
-*/
+	if sortBy == "" || order == "" {
+		http.Error(w, `{"error": "sort_by and order query parameters are required"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Validate order parameter
+	if order != "asc" && order != "desc" {
+		http.Error(w, `{"error": "order must be 'asc' or 'desc'"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Construct SQL query
+	queryString := "SELECT id, amount, description, category, payment_method, created_at FROM records ORDER BY " + sortBy + " " + order
+	rows, err := db.Query(queryString)
+	if err != nil {
+		http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
+		log.Println("Error querying records:", err)
+		return
+	}
+	defer rows.Close()
+
+	// Slice to store records
+	var records []models.Record
+
+	// Iterate through rows and scan into records slice
+	for rows.Next() {
+		var record models.Record
+		err := rows.Scan(&record.ID, &record.Amount, &record.Description, &record.Category, &record.PaymentMethod, &record.CreatedAt)
+		if err != nil {
+			http.Error(w, `{"error": "Error scanning records"}`, http.StatusInternalServerError)
+			log.Println("Error scanning record:", err)
+			return
+		}
+		records = append(records, record)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, `{"error": "Error iterating over records"}`, http.StatusInternalServerError)
+		log.Println("Error iterating over rows:", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(records)
+}

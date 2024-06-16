@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS records (
     amount INT NOT NULL,
     description VARCHAR(100) NOT NULL,
     category VARCHAR(15) NOT NULL,
-    payment_method VARCHAR(10) NOT NULL
+    payment_method VARCHAR(10) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
