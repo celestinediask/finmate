@@ -42,25 +42,16 @@ func main() {
 	r.Mount("/user", userRoutes)
 	userRoutes.Use(controllers.UserAuthMiddleware)
 	userRoutes.Get("/validate", controllers.Validate)
+	userRoutes.Get("/profile", controllers.Profile)
+	userRoutes.Post("/add-record", controllers.AddRecord)
+	userRoutes.Get("/list-records", controllers.ListRecords)
+	userRoutes.Put("/edit-record/{id}", controllers.EditRecord)
+	userRoutes.Delete("/delete-record/{id}", controllers.DeleteRecord)
+	userRoutes.Get("/get-record/{id}", controllers.GetRecordByID)
+	userRoutes.Get("/search-records", controllers.SearchRecords)
+	userRoutes.Get("/count-records", controllers.CountRecords)
 
 	fmt.Println("Server started on :8080")
 	http.ListenAndServe(":8080", r)
 
 }
-
-/*
-	userRoutes := r.Group("/", controllers.UserAuthMiddleware())
-	{
-		//userRoutes.Get("/validate", controllers.Validate)
-		// userRoutes.Get("/profile", controllers.Profile)
-		// userRoutes.Post("/add-record", controllers.AddRecord)
-		// userRoutes.Get("/list-records", controllers.ListRecords)
-		// userRoutes.Put("/edit-record/:id", controllers.EditRecord)
-		// userRoutes.Delete("/delete-record/:id", controllers.DeleteRecord)
-
-		// userRoutes.Get("/get-record/:id", controllers.GetRecordByID)
-		// userRoutes.Patch("/patch-record/:id", controllers.PatchRecord)
-		// userRoutes.Get("/search-records", controllers.SearchRecords)
-		//userRoutes.GET("/count-records", controllers.CountRecords)
-	}
-*/

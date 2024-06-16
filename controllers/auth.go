@@ -230,68 +230,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
 
-// func UserAuthMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		jwtSecret := os.Getenv("JWT_SECRET")
-// 		if jwtSecret == "" {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": "JWT secret is missing"})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		jwtToken := c.GetHeader("Authorization")
-// 		if jwtToken == "" {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		// Ensure the token format is correct
-// 		if !strings.HasPrefix(jwtToken, "Bearer ") {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "bearer token is missing"})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		// Extract the token string (excluding the "Bearer " prefix)
-// 		tokenString := jwtToken[7:]
-
-// 		// Validate the JWT token
-// 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-// 			return []byte(jwtSecret), nil
-// 		})
-// 		if err != nil || !token.Valid {
-// 			// Log the error for debugging
-// 			fmt.Println("Token validation error:", err)
-// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		// Check token expiration
-// 		claims, ok := token.Claims.(jwt.MapClaims)
-// 		if !ok || !token.Valid {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		expirationTime := time.Unix(int64(claims["exp"].(float64)), 0)
-// 		if time.Now().After(expirationTime) {
-// 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token has expired"})
-// 			c.Abort()
-// 			return
-// 		}
-
-// 		// Set claims in context for further processing
-// 		c.Set("username", claims["username"])
-// 		c.Set("email", claims["email"])
-
-// 		// Proceed to the next middleware or handler
-// 		c.Next()
-// 	}
-// }
-
 func UserAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jwtSecret := os.Getenv("JWT_SECRET")
@@ -347,59 +285,6 @@ func UserAuthMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-/*
-	func UserAuthMiddleware() gin.HandlerFunc {
-		return func(c *gin.Context) {
-
-			jwtSecret := os.Getenv("JWT_SECRET")
-			if jwtSecret == "" {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "jwt secret is missing"})
-				c.Abort()
-				return
-			}
-
-			jwtToken := c.GetHeader("Authorization")
-			if jwtToken == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "auth header is missing"})
-				c.Abort()
-				return
-			}
-
-			// Validate the JWT token
-			token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
-				return []byte(jwtSecret), nil
-			})
-			if err != nil || !token.Valid {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-				c.Abort()
-				return
-			}
-
-			// check if token expired
-			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-				username := claims["username"]
-				email := claims["email"]
-				c.Set("username", username)
-				c.Set("email", email)
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Session expired please login again"})
-				c.Abort()
-				return
-			}
-
-			//c.JSON(http.StatusOK, gin.H{"token": jwtToken})
-
-			c.Next()
-		}
-	}
-*/
-/*
-
-
-
-
- */
 
 func Validate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
