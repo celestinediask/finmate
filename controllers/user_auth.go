@@ -1,12 +1,9 @@
 package controllers
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"strings"
 	"time"
 
 	"finmate/database"
@@ -17,7 +14,6 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var JWTSecret = []byte(os.Getenv("JWT_KEY"))
@@ -32,7 +28,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// hash password
-	hashedPassword, err := HashPassword(user.Password)
+	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -83,7 +79,7 @@ func SendOTPEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	otp := generateOTP()
+	otp := utils.GenerateOTP()
 	if otp == "" {
 		http.Error(w, "OTP generation failed", http.StatusInternalServerError)
 		return
@@ -200,7 +196,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if match := CheckPasswordHash(req.Password, user.Password); !match {
+	if match := utils.CheckPasswordHash(req.Password, user.Password); !match {
 		http.Error(w, "Invalid password", http.StatusUnauthorized)
 		return
 	}
@@ -230,78 +226,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
 
-func UserAuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		jwtSecret := os.Getenv("JWT_SECRET")
-		if jwtSecret == "" {
-			http.Error(w, "JWT secret is missing", http.StatusInternalServerError)
-			return
-		}
-
-		jwtToken := r.Header.Get("Authorization")
-		if jwtToken == "" {
-			http.Error(w, "Authorization header is missing", http.StatusUnauthorized)
-			return
-		}
-
-		// Ensure the token format is correct
-		if !strings.HasPrefix(jwtToken, "Bearer ") {
-			http.Error(w, "Bearer token is missing", http.StatusUnauthorized)
-			return
-		}
-
-		// Extract the token string (excluding the "Bearer " prefix)
-		tokenString := jwtToken[7:]
-
-		// Validate the JWT token
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte(jwtSecret), nil
-		})
-		if err != nil || !token.Valid {
-			// Log the error for debugging
-			fmt.Println("Token validation error:", err)
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
-			return
-		}
-
-		// Check token expiration
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
-			return
-		}
-
-		expirationTime := time.Unix(int64(claims["exp"].(float64)), 0)
-		if time.Now().After(expirationTime) {
-			http.Error(w, "Token has expired", http.StatusUnauthorized)
-			return
-		}
-
-		// Set claims in context for further processing
-		ctx := context.WithValue(r.Context(), "username", claims["username"])
-		ctx = context.WithValue(ctx, "email", claims["email"])
-
-		// Proceed to the next middleware or handler
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
 func Validate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "I'm logged in"})
-}
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-func generateOTP() string {
-	return fmt.Sprintf("%06d", rand.Intn(1000000))
 }

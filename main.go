@@ -4,6 +4,7 @@ import (
 	"finmate/config"
 	"finmate/controllers"
 	"finmate/database"
+	"finmate/middlewares"
 
 	"fmt"
 	"net/http"
@@ -19,10 +20,18 @@ func init() {
 	database.MigrateTable()
 }
 
-// sort time
+// Completed
+// sort by created at
 // sort amount
 // sort by date
 // filter by category
+// jwt token
+// email otp verification
+// common response structure
+
+// add admin middleware
+// add subscriptions
+// user list subscriptions
 
 func main() {
 
@@ -40,7 +49,7 @@ func main() {
 	// user routes
 	userRoutes := chi.NewRouter()
 	r.Mount("/user", userRoutes)
-	userRoutes.Use(controllers.UserAuthMiddleware)
+	userRoutes.Use(middlewares.UserAuthMiddleware)
 	userRoutes.Get("/validate", controllers.Validate)
 	userRoutes.Get("/profile", controllers.Profile)
 	userRoutes.Post("/add-record", controllers.AddRecord)
