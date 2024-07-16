@@ -13,8 +13,14 @@ import (
 	"github.com/go-chi/chi"
 )
 
+func ValidateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "I'm logged in"})
+}
+
 func Profile(w http.ResponseWriter, r *http.Request) {
-	// Retrieve the username from the context
+
 	username, ok := r.Context().Value("username").(string)
 	if !ok {
 		http.Error(w, "Unable to retrieve username from context", http.StatusInternalServerError)
@@ -23,7 +29,6 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 
-	// Query to get user details
 	query := "SELECT username, email, is_email_verified FROM users WHERE username = $1"
 	err := database.DB.QueryRow(query, username).Scan(&user.Username, &user.Email, &user.EmailVerified)
 	if err == sql.ErrNoRows {
@@ -34,7 +39,6 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return user details as JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
@@ -122,7 +126,7 @@ func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	var exists bool
 	db := database.DB
-	// Check if the record exists
+
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM records WHERE id = $1)", id).Scan(&exists)
 	if err != nil {
 		http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
@@ -135,7 +139,6 @@ func DeleteRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete the record
 	_, err = db.Exec("DELETE FROM records WHERE id = $1", id)
 	if err != nil {
 		http.Error(w, `{"error": "Failed to delete record"}`, http.StatusInternalServerError)
@@ -237,13 +240,11 @@ func SortRecords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate order parameter
 	if order != "asc" && order != "desc" {
 		http.Error(w, `{"error": "order must be 'asc' or 'desc'"}`, http.StatusBadRequest)
 		return
 	}
 
-	// Construct SQL query
 	queryString := "SELECT id, amount, description, category, payment_method, created_at FROM records ORDER BY " + sortBy + " " + order
 	rows, err := db.Query(queryString)
 	if err != nil {
@@ -253,10 +254,8 @@ func SortRecords(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	// Slice to store records
 	var records []models.Record
 
-	// Iterate through rows and scan into records slice
 	for rows.Next() {
 		var record models.Record
 		err := rows.Scan(&record.ID, &record.Amount, &record.Description, &record.Category, &record.PaymentMethod, &record.CreatedAt)
@@ -275,4 +274,32 @@ func SortRecords(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(records)
+}
+
+func ListPlans(w http.ResponseWriter, r *http.Request) {
+	db := database.DB
+	rows, err := db.Query("SELECT id, name, description, price, created_at FROM plans")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	plans := make([]models.SubscriptionPlan, 0)
+	for rows.Next() {
+		var plan models.SubscriptionPlan
+		err := rows.Scan(&plan.ID, &plan.Name, &plan.Description, &plan.Price, &plan.CreatedAt)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		plans = append(plans, plan)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(plans)
 }

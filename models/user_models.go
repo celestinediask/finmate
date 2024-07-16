@@ -6,9 +6,9 @@ import (
 
 type User struct {
 	ID            uint   `json:"id"`
-	Username      string `json:"username" binding:"required"`
-	Email         string `json:"email" binding:"required"`
-	Password      string `json:"password" binding:"required"`
+	Username      string `json:"username" validate:"required,alphanum,min=4,max=15"`
+	Email         string `json:"email" validate:"required,email"`
+	Password      string `json:"password" validate:"required,min=3"`
 	EmailVerified bool   `json:"is_email_verified"`
 	IsAdmin       bool
 }
@@ -29,8 +29,8 @@ type VerifyEmailReq struct {
 }
 
 type LoginReq struct {
-	UsernameOrEmail string `json:"username_or_email" binding:"required"`
-	Password        string `json:"password" binding:"required"`
+	UsernameOrEmail string `json:"username_or_email" validate:"required"`
+	Password        string `json:"password" validate:"required"`
 }
 
 type OTPDetails struct {
@@ -45,4 +45,12 @@ type Record struct {
 	Category      string    `json:"category"`
 	PaymentMethod string    `json:"payment_method"`
 	CreatedAt     time.Time `json:"created_at"`
+}
+
+type Transaction struct {
+	ID        int    `json:"id"`
+	OrderID   string `json:"order_id"`
+	PaymentID string `json:"payment_id"`
+	Status    string `json:"status"`
+	Amount    int    `json:"amount"`
 }

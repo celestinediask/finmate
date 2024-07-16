@@ -5,6 +5,7 @@ import (
 	"finmate/controllers"
 	"finmate/database"
 	"finmate/middlewares"
+	"finmate/utils"
 
 	"fmt"
 	"net/http"
@@ -20,18 +21,20 @@ func init() {
 	database.MigrateTable()
 }
 
-// Completed
-// sort by created at
-// sort amount
-// sort by date
-// filter by category
-// jwt token
-// email otp verification
-// common response structure
-
-// add admin middleware
-// add subscriptions
-// user list subscriptions
+/*
+finish payment integration and admin side
+Integrate online payment method(Razorpay or Paypal).
+Coupon Management (Apply Coupon, Remove Coupon)
+Admin side :
+Offer module(Product offer, Category offer, Referral offer).
+Sales report(Daily, Weekly, Yearly, Custom date)
+Generate sales report ,Should be able to filter based on
+Custom date range ,1 Day / week / month ,
+Show  discount and coupons deduction in sales report
+Overall sales count  ,Overall order amount ,
+Overall discount,Report download (Pdf, Excel)""
+Correct Jwt token validation
+*/
 
 func main() {
 
@@ -41,7 +44,7 @@ func main() {
 
 	// auth routes
 	r.Post("/signup", controllers.Signup)
-	r.Post("/send-email-otp", controllers.SendOTPEmail)
+	r.Post("/send-email-otp", utils.SendOTPEmail)
 	r.Post("/verify-email", controllers.VerifyEmail)
 	r.Post("/login", controllers.Login)
 	//r.Post("/logout", controllers.Logout)
@@ -50,7 +53,7 @@ func main() {
 	userRoutes := chi.NewRouter()
 	r.Mount("/user", userRoutes)
 	userRoutes.Use(middlewares.UserAuthMiddleware)
-	userRoutes.Get("/validate", controllers.Validate)
+	userRoutes.Get("/validate", controllers.ValidateUser)
 	userRoutes.Get("/profile", controllers.Profile)
 	userRoutes.Post("/add-record", controllers.AddRecord)
 	userRoutes.Get("/list-records", controllers.ListRecords)
@@ -59,8 +62,19 @@ func main() {
 	userRoutes.Get("/get-record/{id}", controllers.GetRecordByID)
 	userRoutes.Get("/search-records", controllers.SearchRecords)
 	userRoutes.Get("/count-records", controllers.CountRecords)
-
 	userRoutes.Get("/sort-records", controllers.SortRecords)
+	userRoutes.Get("/list-plans", controllers.ListPlans)
+	r.Post("/create-order", controllers.CreateOrder)
+
+	// admin routes
+	adminRoutes := chi.NewRouter()
+	r.Mount("/admin", adminRoutes)
+	adminRoutes.Use(middlewares.AdminAuthMiddleware)
+	adminRoutes.Get("/validate", controllers.ValidateAdmin)
+	adminRoutes.Post("/add-plan", controllers.AddSubscriptionPlan)
+	adminRoutes.Delete("/delete-plan/{id}", controllers.DeletePlan)
+	//adminRoutes.Put("/edit-plan/{id}", controllers.EditPlan)
+	//adminRoutes.Get("/list-plans", controllers.ListPlans)
 
 	fmt.Println("Server started on :8080")
 	http.ListenAndServe(":8080", r)
