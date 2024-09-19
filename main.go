@@ -4,14 +4,9 @@ import (
 	"finmate/config"
 	"finmate/controllers"
 	"finmate/database"
-	"finmate/middlewares"
-	"finmate/utils"
-
 	"fmt"
+	"log"
 	"net/http"
-
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 )
 
 func init() {
@@ -38,9 +33,22 @@ Correct Jwt token validation
 
 func main() {
 
+	// set up HTTP routes
+	http.HandleFunc("/signup", controllers.Signup)
+
+	// Start the server
+	fmt.Println("Server is running on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// chi router setup (abondened)
+/*
+func main() {
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
+
 
 	// auth routes
 	r.Post("/signup", controllers.Signup)
@@ -80,3 +88,4 @@ func main() {
 	http.ListenAndServe(":8080", r)
 
 }
+*/

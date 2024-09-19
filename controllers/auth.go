@@ -22,6 +22,11 @@ var validate *validator.Validate
 
 func Signup(w http.ResponseWriter, r *http.Request) {
 
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var user models.User
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -53,6 +58,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
+		Password: "",
 	}
 
 	w.WriteHeader(http.StatusCreated)

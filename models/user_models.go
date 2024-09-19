@@ -6,7 +6,7 @@ import (
 
 type User struct {
 	ID            uint   `json:"id"`
-	Username      string `json:"username" validate:"required,alphanum,min=4,max=15"`
+	Username      string `json:"username" validate:"required,alphanum,min=3,max=15"`
 	Email         string `json:"email" validate:"required,email"`
 	Password      string `json:"password" validate:"required,min=3"`
 	EmailVerified bool   `json:"is_email_verified"`
@@ -17,6 +17,7 @@ type UserResponse struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type SendOTPEmailReq struct {
