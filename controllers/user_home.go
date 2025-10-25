@@ -5,13 +5,67 @@ import (
 	"encoding/json"
 	"finmate/database"
 	"finmate/models"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 )
+
+func RecordHandler(w http.ResponseWriter, r *http.Request) {
+	// Get type from query (income or expense)
+	transactionType := r.URL.Query().Get("type")
+	if transactionType == "" {
+		transactionType = "Transaction"
+	}
+
+	// Create data to send to HTML
+	data := map[string]interface{}{
+		"Date": time.Now().Format("02-Jan-2006"),
+		"Tag":  capitalize(transactionType),
+	}
+
+	tmpl, err := template.ParseFiles("templates/record.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, data)
+}
+
+// helper to capitalize first letter
+func capitalize(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return string(s[0]-32) + s[1:]
+}
+
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("templates/home.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
+
+func Num(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "One")
+}
+
+func Status(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "finmate")
+}
+
+func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hello, World!")
+}
 
 func ValidateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
