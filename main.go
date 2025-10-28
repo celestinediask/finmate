@@ -33,6 +33,16 @@ Correct Jwt token validation
 
 func main() {
 
+	http.HandleFunc("/record", controllers.RecordHandler)
+
+	http.HandleFunc("/home", controllers.HomeHandler)
+
+	http.HandleFunc("/number", controllers.Num)
+
+	http.HandleFunc("/status", controllers.Status)
+
+	http.HandleFunc("/hello", controllers.HelloWorldHandler)
+
 	// set up HTTP routes
 	http.HandleFunc("/signup", controllers.Signup)
 
